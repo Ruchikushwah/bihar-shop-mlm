@@ -1,11 +1,15 @@
 <?php
 
+use App\Livewire\MembershipTree;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+
+Route::get('/members', MembershipTree::class)->name('home');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
