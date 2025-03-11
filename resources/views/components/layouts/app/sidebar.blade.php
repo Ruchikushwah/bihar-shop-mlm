@@ -14,9 +14,10 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('admin.manageUser')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('ManageUser') }}</flux:navlist.item>
+                    <flux:navlist.item icon="home" :href="route('admin.manageMembers')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('ManageMember') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
-
             <flux:spacer />
 
             <flux:navlist variant="outline">

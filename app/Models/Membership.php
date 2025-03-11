@@ -24,4 +24,11 @@ class Membership extends Model
     {
         return $this->belongsTo(Membership::class, 'right_id');
     }
+     
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+
 }
