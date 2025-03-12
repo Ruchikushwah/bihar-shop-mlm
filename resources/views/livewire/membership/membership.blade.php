@@ -8,6 +8,7 @@
         @if(session()->has('error'))
         <div class="text-red-500 text-sm">{{ session('error') }}</div>
         @endif
+        
 
         <div class="mb-4">
             <button wire:click="openSection(1)" class="w-full text-left p-4 mb-2 bg-[#3282b8d2] text-white rounded">
@@ -325,6 +326,5 @@
             {{ session('success') }}
         </div>
         @endif
-
     </div>
 </div>

@@ -141,40 +141,39 @@ class Membership extends Component
 
     public function save()
     {
+        $userMembership = ModelsMembership::where('user_id', Auth::id())->first();
+        if ($userMembership) {
+            session()->flash('error', 'You already have an active membership.');
+            return;
+        }
         if (!$this->membershipId) {
             $this->validateSection(1);
-    
+
             $membership = ModelsMembership::where('referal_id', $this->referal_id)->first();
-    
+
             if ($membership) {
                 $this->membershipId = $membership->id;
-                $this->name = $membership->name;
-    
-                // Get the last referral_id, extract the number, and increment by 1
+                $this->name = Auth::user()->name;
+
+                
                 $lastReferalId = ModelsMembership::latest('id')->value('referal_id');
                 $lastNumber = intval(str_replace('BSE', '', $lastReferalId));
                 $newReferalId = 'BSE' . ($lastNumber + 1);
-    
-                // Check if the parent is already full (both left and right are occupied)
+
                 if ($membership->left_id && $membership->right_id) {
                     session()->flash('error', 'Both left and right positions are already filled for this parent.');
                     $this->assignToNextAvailableParent($newReferalId);
                     return;
                 }
-    
-                // Determine whether to place the new member in the left or right position
                 $position = !$membership->left_id ? 'left_id' : 'right_id';
-    
-                // Create a new membership with the new referral ID
                 $newMembership = ModelsMembership::create([
                     'name' => $this->name,
                     'referal_id' => $newReferalId,
                     'parent_id' => $this->membershipId,
+                    'user_id' => Auth::id(),
                 ]);
-    
-                // Update the parent with the new member
+
                 $membership->update([$position => $newMembership->id]);
-    
             } else {
                 session()->flash('error', 'No membership found with the provided referral ID.');
                 return;
@@ -182,7 +181,7 @@ class Membership extends Component
         } else {
             $this->updateMembership();
         }
-    
+
         if ($this->activeSection === 6) {
             $this->showConfirmation = true;
         } else {
@@ -190,37 +189,32 @@ class Membership extends Component
             $this->resetFormFields($this->activeSection);
         }
     }
-    
-    // Assign the new member to the next available parent if the current parent is full
+
     public function assignToNextAvailableParent($newReferalId)
     {
         $availableParent = ModelsMembership::whereNull('left_id')
             ->orWhereNull('right_id')
             ->first();
-    
+
         if ($availableParent) {
-            // Create a new membership under the available parent
             $newMembership = ModelsMembership::create([
                 'name' => $this->name,
                 'referal_id' => $newReferalId,
                 'parent_id' => $availableParent->id,
+                
             ]);
-    
-            // Determine left or right position and update the parent
             $position = !$availableParent->left_id ? 'left_id' : 'right_id';
             $availableParent->update([$position => $newMembership->id]);
-    
+
             session()->flash('success', 'New member assigned to the next available parent.');
         } else {
             session()->flash('error', 'No available parent found to assign the new member.');
         }
     }
-    
-    // Automatically update the name when the referral ID is updated
     public function updatedReferalId($value)
     {
         $membership = ModelsMembership::where('referal_id', $value)->first();
-    
+
         if ($membership) {
             $user = User::find($membership->user_id);
             $this->name = $user ? $user->name : '';
@@ -229,25 +223,15 @@ class Membership extends Component
             session()->flash('error', 'No membership found with the provided referral ID.');
         }
     }
-    
-    // public function updatedReferalId($value)
-    // {
-    //     $membership = ModelsMembership::where('referal_id', $value)->first();
-
-    //     if ($membership) {
-    //         $user = User::find($membership->user_id);
-    //         if ($user) {
-    //             $this->name = $user->name;
-    //         } else {
-    //             $this->name = '';
-    //         }
-    //     } else {
-    //         $this->name = '';
-    //         session()->flash('error', 'No membership found with the provided referral ID.');
-    //     }
-    // }
     public function updateMembership()
     {
+
+        $userMembership = ModelsMembership::where('user_id', Auth::id())->first();
+
+        if (!$userMembership) {
+            session()->flash('error', 'No membership found for the current user.');
+            return;
+        }
         $membership = ModelsMembership::find($this->membershipId);
 
         if (!$membership) {
@@ -312,7 +296,8 @@ class Membership extends Component
         $this->activeSection++;
     }
 
-    public function showConfirmationModal(){
+    public function showConfirmationModal()
+    {
         $this->showConfirmation;
     }
     public function finalSubmit()
@@ -323,7 +308,7 @@ class Membership extends Component
         session()->flash('success', 'Membership form submitted successfully!');
 
         $this->reset();
-       
+
         $this->activeSection = 1;
     }
 

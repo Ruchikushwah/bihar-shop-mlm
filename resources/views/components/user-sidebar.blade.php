@@ -15,7 +15,13 @@
         <a href="#" class="block px-4 py-2 text-gray-700 hover:text-blue-600">{{ auth()->user()->email }}</a>
         <!-- <a href="#" class="block px-4 py-2 text-gray-700 hover:text-blue-600"></a>
     <a href="#" class="block px-4 py-2 text-white bg-blue-600 rounded-lg">Membership</a> -->
-
     </div>
 
-</div>
+        <form method="POST" action="{{ route('logout') }}" class="w-full">
+            @csrf
+            <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
+                {{ __('Log Out') }}
+            </flux:menu.item>
+        </form>
+
+    </div>
